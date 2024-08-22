@@ -1,15 +1,17 @@
 module arbiter_fsm (
-    input logic clock,         // Clock signal
-    input logic [3:1] r,       // 3-bit input vector
-    output logic [1:0] state   // 2-bit output state (S1, S0)
+    input logic clock,          // Clock signal
+    input logic [3:1] r,        // 3-bit input vector
+    input logic resetn,         // Active low reset
+    output logic [3:1] g        // (g3, g2, g1) 1-hot output state
+
 );
 
     // Define state encoding
-    typedef enum logic [1:0] {
-        A = 2'b00,   // State A
-        B = 2'b01,   // State B
-        C = 2'b10,   // State C
-        D = 2'b11    // State D
+    typedef enum logic [3:1] {
+        A = 3'b000,   // State A
+        B = 3'b001,   // State B
+        C = 3'b010,   // State C
+        D = 3'b100    // State D
     } state_t;
 
     state_t current_state, next_state;
@@ -27,7 +29,7 @@ module arbiter_fsm (
                     3'b101: next_state = B;
                     3'b110: next_state = C;
                     3'b111: next_state = B;
-                    default: next_state = A;
+                    // default: next_state = A;
                 endcase
             end
 
@@ -41,7 +43,7 @@ module arbiter_fsm (
                     3'b101: next_state = B;
                     3'b110: next_state = A;
                     3'b111: next_state = B;
-                    default: next_state = A;
+                    // default: next_state = A;
                 endcase
             end
 
@@ -55,7 +57,7 @@ module arbiter_fsm (
                     3'b101: next_state = A;
                     3'b110: next_state = C;
                     3'b111: next_state = C;
-                    default: next_state = A;
+                    // default: next_state = A;
                 endcase
             end
 
@@ -65,11 +67,11 @@ module arbiter_fsm (
                     3'b001: next_state = A;
                     3'b010: next_state = A;
                     3'b011: next_state = A;
-                    3'b100: next_state = C;
-                    3'b101: next_state = C;
-                    3'b110: next_state = C;
-                    3'b111: next_state = C;
-                    default: next_state = A;
+                    3'b100: next_state = D;
+                    3'b101: next_state = D;
+                    3'b110: next_state = D;
+                    3'b111: next_state = D;
+                    // default: next_state = A;
                 endcase
             end
 
@@ -79,8 +81,13 @@ module arbiter_fsm (
 
     // Sequential logic to update state on clock edge
     always_ff @(posedge clock) begin
-        current_state <= next_state;
-        state <= current_state;  // Output the current state
+        if (resetn) begin
+            current_state <= next_state;
+            g <= current_state;  // Output the current state
+        end else begin
+            current_state <= A;
+            g <= A;
+        end
     end
 
 endmodule
