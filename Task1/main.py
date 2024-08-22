@@ -5,7 +5,7 @@ depths_total = 0
 depths_length = 0
 current_path = '/'
 
-file = open("commands_2.txt", "r")
+file = open("commands.txt", "r")
 for line in file:
     line = line[:-1]  # strip new line - N.B. needs new line at end of file
     if line[0] == '$':
